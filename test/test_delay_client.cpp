@@ -1,20 +1,20 @@
 #include "test_common.cpp"
 #include <map>
 
-static const int MAX_MSG_SIZE = 1024 * 64;
+static const int MAX_Test_Msg_SIZE = 1024 * 64;
 
-struct MSG {
+typedef struct Test_Msg {
 	uint64_t tick;
-	char data[MAX_MSG_SIZE];
-};
+    char data[MAX_Test_Msg_SIZE];
+} Test_Msg;
 
-static std::map<uint64_t, MSG> snd_msg_map;
+static std::map<uint64_t, Test_Msg> snd_Test_Msg_map;
 
-static int make_msg(uint64_t tick, MSG& msg, int size_min, int size_max) {
-	msg.tick = tick;
+static int make_Test_Msg(uint64_t tick, Test_Msg& Test_Msg, int size_min, int size_max) {
+    Test_Msg.tick = tick;
 	uint32_t size = (rand_u32() % (size_max - size_min + 1)) + size_min;
 	for (uint32_t i = 0; i < size; ++i) {
-		msg.data[i] = 'a' + (rand_u32() % 26);
+        Test_Msg.data[i] = 'a' + (rand_u32() % 26);
 	}
 	return size;
 }
@@ -26,24 +26,24 @@ int main(int argc, char* argv[]) {
 #endif
 
 	if (argc < 7) {
-		printf("usage: test_delay_client <remote_ip> <remote_port> <duration second> <snd_interval_ms> <msg_size_min> <msg_size_max>");
+        printf("usage: test_delay_client <remote_ip> <remote_port> <duration second> <snd_interval_ms> <Test_Msg_size_min> <Test_Msg_size_max>");
 		return -1;
 	}
 
 	char* remote_ip = argv[1];
 	uint32_t remote_port = (uint32_t)atoi(argv[2]);
-	uint64_t dur = (uint64_t)atoi(argv[3]);
-	uint64_t snd_interval = (uint64_t)atoi(argv[4]);
-	uint32_t msg_size_min = (uint32_t)atoi(argv[5]);
-	uint32_t msg_size_max = (uint32_t)atoi(argv[6]);
+    uint64_t dur = (uint64_t)atoi(argv[3]);           //存活的时长
+    uint64_t snd_interval = (uint64_t)atoi(argv[4]);  //发送的间隔
+    uint32_t Test_Msg_size_min = (uint32_t)atoi(argv[5]);
+    uint32_t Test_Msg_size_max = (uint32_t)atoi(argv[6]);
 
-	if (msg_size_max < msg_size_min) {
-		printf("msg_size_max must greater than msg_size_min\n");
+    if (Test_Msg_size_max < Test_Msg_size_min) {
+        printf("Test_Msg_size_max must greater than Test_Msg_size_min\n");
 		return -2;
 	}
 
-	if (msg_size_max > MAX_MSG_SIZE) {
-		printf("msg_size_max must less than 64kh\n");
+    if (Test_Msg_size_max > MAX_Test_Msg_SIZE) {
+        printf("Test_Msg_size_max must less than 64kh\n");
 		return -3;
 	}
 
@@ -56,34 +56,34 @@ int main(int argc, char* argv[]) {
 
 		uint64_t cur = get_tick_ms();
 		if (cur > nextSend) {
-			MSG& msg = snd_msg_map[cur];
-			memset(&msg, 0, sizeof(msg));
-			int size = make_msg(cur, msg, msg_size_min, msg_size_max);
+            Test_Msg& Test_Msg = snd_Test_Msg_map[cur];
+            memset(&Test_Msg, 0, sizeof(Test_Msg));
+            int size = make_Test_Msg(cur, Test_Msg, Test_Msg_size_min, Test_Msg_size_max);
 			if (size > 0) {
-				snd_msg_map[msg.tick] = msg;
-				kcpuv_send(kcpuv, conv, &msg, sizeof(uint64_t) + size);
+                snd_Test_Msg_map[Test_Msg.tick] = Test_Msg;
+                kcpuv_send(kcpuv, conv, &Test_Msg, sizeof(uint64_t) + size);
 				nextSend = cur + snd_interval;
 			}
 		}
 
-		kcpuv_msg_t msg;
+        kcpuv_msg_t msg;
 		uint64_t now = get_tick_ms();
 		while (true) {
-			int r = kcpuv_recv(kcpuv, &msg);
+            int r = kcpuv_recv(kcpuv, &msg);
 			if (r < 0) break;
 
-			MSG m;
+            Test_Msg m;
 			memset(&m, 0, sizeof(m));
-			memcpy(&m, msg.data, msg.size < sizeof(m) ? msg.size : sizeof(m));
+            memcpy(&m, msg.data, msg.size < sizeof(m) ? msg.size : sizeof(m));
 
-			std::map<uint64_t, MSG>::iterator it = snd_msg_map.find(m.tick);
-			if (it == snd_msg_map.end()) {
-				printf("msg not found %"PRIu64"\n", m.tick);
+            std::map<uint64_t, Test_Msg>::iterator it = snd_Test_Msg_map.find(m.tick);
+            if (it == snd_Test_Msg_map.end()) {
+                printf("Test_Msg not found %" PRIu64 "\n", m.tick);
 			} else {
 				if (memcmp(&it->second, &m, sizeof(m)) == 0) {
-					printf("%"PRIu64"\n", now - m.tick);
+                    printf("%" PRIu64 "\n", now - m.tick);
 				} else {
-					printf("recved a diff msg %"PRIu64"\n", m.tick);
+                    printf("recved a diff Test_Msg %" PRIu64 "\n", m.tick);
 				}
 			}
 		}

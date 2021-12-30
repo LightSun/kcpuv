@@ -27,7 +27,7 @@ int main() {
 		uint64_t cur = get_tick_ms();
 		if (cur > nextSend) {
 			char xxx[1024];
-			sprintf(xxx, "tick - %"PRIu64, cur);
+            sprintf(xxx, "tick - %" PRIu64, cur);
 			kcpuv_send(kcpuv, conv, xxx, strlen(xxx));
 			nextSend = cur + 1000;
 		}

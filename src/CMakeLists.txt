@@ -45,7 +45,7 @@ endif ()
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/../inc/
-  ${CMAKE_CURRENT_SOURCE_DIR}/../libuv/inc/
+  ${CMAKE_CURRENT_SOURCE_DIR}/../libuv-1.42.0/include/
   ${CMAKE_CURRENT_SOURCE_DIR}/../kcp/
 )
 
