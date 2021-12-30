@@ -138,7 +138,7 @@ kcpuv_conv_t Network::connect(const char* local_addr, int port) {
 	_udp.data = conn;
 	uv_udp_init(_loop, &_udp);
 
-	r = uv_ip4_addr(local_addr, port, &addr);
+    r = uv_ip4_addr(strcmp("localhost",local_addr) != 0 ? local_addr : "127.0.0.1", port, &addr);
 	PROC_ERR(r);
 
 	r = conn->prepare_req_conn((const struct sockaddr*)&addr, &_udp);
@@ -166,12 +166,11 @@ Exit0:
 }
 
 void Network::on_recv_udp(const char* buf, ssize_t size, const struct sockaddr* addr) {
-	int r = -1;
 	kcpuv_conv_t conv;
 	Conn* conn = NULL;
 
-	r = ikcp_get_conv(buf, (long)size, &conv);
-	PROC_ERR(r);
+    conv = (kcpuv_conv_t)ikcp_getconv(buf);
+    PROC_ERR(conv);
 	
 	if (conv == CONV_REQ_CONN) {
 		proc_req_conn(buf, (uint32_t)size, addr);

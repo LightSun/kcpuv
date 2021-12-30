@@ -31,6 +31,7 @@ int ConnServer::prepare_snd_conv(const sockaddr* addr, uv_udp_t* handle, uint32_
 	_addr = *addr;
 	_udp = handle;
 	_n = n;
+    //TODO 当用于生产环境时，_conv应该是统一生成的，具有唯一标识的。
 	_conv = new_conv();
 
 	_next_snd_conv_tick = 0;

@@ -19,6 +19,7 @@ static int make_Test_Msg(uint64_t tick, Test_Msg& Test_Msg, int size_min, int si
 	return size;
 }
 
+//test_delay_client.exe localhost 9527 180000 30 10 100
 int main(int argc, char* argv[]) {
 #if defined(PLATFORM_WINDOWS) && defined(_DEBUG)
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);

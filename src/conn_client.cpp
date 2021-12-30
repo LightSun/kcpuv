@@ -58,8 +58,8 @@ void ConnClient::on_recv_udp_snd_conv(const char* buf, ssize_t size) {
 	kcpuv_conv_t conv;
 	hs_snd_conv_s* hs = NULL;
 
-	r = ikcp_get_conv(buf, (long)size, &conv);
-	PROC_ERR_NOLOG(r);
+    conv = (kcpuv_conv_t)ikcp_getconv(buf);
+    PROC_ERR_NOLOG(conv);
 
 	CHK_COND_NOLOG(conv == CONV_SND_CONV);
 	CHK_COND_NOLOG(sizeof(hs_snd_conv_s) == size);
